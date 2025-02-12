@@ -1,0 +1,102 @@
+.container-smtp-account-principal{
+    width: 100%;
+    height: min-content;
+    background-color: rgb(235, 235, 236);
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    flex-direction: column;
+    padding-top: 50px;
+}
+
+
+.container-smtp-account, .container-smtp-account-two{
+    background-color: rgb(255, 255, 255);
+    max-width: 50%;
+    height: 600px;
+    padding: 15px 15px 20px 15px;
+    box-shadow: 2px 5px 15px rgba(0, 0, 0, 0.164);
+    border-radius: 1em;
+}
+
+.container-smtp-account-two{
+    max-width: 50%;
+    height: auto;
+}
+
+.title-smtp-container{
+    text-align: center;
+    padding: 10px;
+    font-weight: 900;
+    color: rgb(19, 141, 255);
+
+}
+
+.btn-group:focus{
+    width: max-content;
+    background-color: rgb(19, 141, 255);
+    color: white;
+}
+
+.btn-create-smtp{
+    width: 100%;
+    background-color: rgb(142, 142, 253);
+    color: white;
+    box-shadow: 2px 2px 25px rgb(161, 161, 255);
+}.btn-create-smtp:hover{
+    box-shadow: 2px 2px 15px rgb(148, 148, 255);
+    background-color: rgb(171, 171, 255);
+    color: white;
+}
+
+@media (max-width: 2560px){
+    .container-smtp-account-principal{
+        height: 120vh;
+
+        
+    }
+
+    .container-smtp-account{
+        width: 60%;
+        margin: 0% 0px 5% 0px;
+    }
+}
+
+@media (max-width: 1024px){
+    .container-smtp-account, .container-smtp-account-two{
+        width: 80%;
+        max-width: 80%;
+    }
+
+ 
+}
+
+
+@media (max-width: 425px){
+    .form-control{
+        font-size: 0.9em;
+    }
+
+    .btn-check{
+        font-size: 0.5em;
+    }
+
+    .btn-outline-primary{
+        padding: 2px;
+        width: max-content;
+        font-size: 0.9em;
+    }
+
+    .container-smtp-account-principal{
+        height: auto;
+        padding-top: 90px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .container-smtp-account,.container-smtp-account-two {
+        width: 100%;
+        max-width: 100%;
+    }
+}

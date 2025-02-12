@@ -4,8 +4,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faUsersGear, faExclamationCircle, faCalendarDay } from '@fortawesome/free-solid-svg-icons';
 import Header from '../../components/header/Header';
 import Logs from '../../components/logs/Logs';
+import { isAccessTokenValid } from "../../api/authService";
 
 function Dashboard() {
+    if (!isAccessTokenValid()) {
+        window.location.href = "/login"; // Redireciona para o login se não estiver autenticado
+      }
     return (
         <div style={{ width: "100%", height: "100vh" }}>
             <div className='container-principal'>

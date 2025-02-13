@@ -20,8 +20,10 @@ export const login = async (email: string, password: string): Promise<LoginRespo
     localStorage.setItem("refreshToken", refreshToken);
     localStorage.setItem("accessTokenExpiresAt", (Date.now() + accessTokenExpiresIn * 1000).toString());
     localStorage.setItem("refreshTokenExpiresAt", (Date.now() + refreshTokenExpiresIn * 1000).toString());
-
+    
     return response.data; // Dados do usuário autenticado
+    
+    
   } catch (error) {
     console.error("Erro ao fazer login:", error);
     throw error;

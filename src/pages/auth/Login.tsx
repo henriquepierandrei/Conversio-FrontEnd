@@ -1,34 +1,73 @@
 import React, { useState } from 'react';
 import '../auth/Auth.css';
 import logo from '../../assets/images/logos/Logo.png';
-import { login } from "../../api/authService.ts"; 
 import { useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import axios from "axios";
+import Cookies from "js-cookie";
+import { faCircleCheck, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 
 function Login() {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
 
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
+      
+        if (!email || !password) {
+            setError("Por favor, preencha todos os campos.");
+            return;
+        }
         try {
-          const userData = await login(email, password);
-          console.log("Usuário autenticado:", userData);
-          // Redireciona para o dashboard após o login
-          navigate("/dashboard");
+          const response = await axios.post("http://localhost:8080/api/v1/auth/login", {
+            email,
+            password,
+          });
+      
+          const { accessToken, refreshToken, accessTokenExpiresIn, refreshTokenExpiresIn } = response.data;
+      
+          // Definir expiração dos tokens em segundos
+          const accessTokenExpirationDays = accessTokenExpiresIn / (60 * 60 * 24); // Converter segundos para dias
+          const refreshTokenExpirationDays = refreshTokenExpiresIn / (60 * 60 * 24);
+      
+          // Armazena os tokens nos cookies
+          Cookies.set("accessToken", accessToken, {
+            expires: accessTokenExpirationDays,
+            secure: true,
+            sameSite: "Strict",
+          });
+      
+          Cookies.set("refreshToken", refreshToken, {
+            expires: refreshTokenExpirationDays,
+            secure: true,
+            sameSite: "Strict",
+          });
+      
+          
+          setSuccess("Login bem sucedido!")
+
+          setTimeout(() => {
+            navigate("/dashboard");
+          }, 1000);
+          
+
         } catch (err) {
-          setError("Falha no login. Verifique suas credenciais.");
+          console.error("Erro no login:", err);
+          setError("Credenciais inválidas!");
         }
       };
+    
 
     return (
         <div className="container-principal-login">
             <div className="container-login">
                 <div style={{ height: "100%", minWidth: "60%" }}>
-                    <form className="form_container" onSubmit={handleSubmit}>
+                    <form className="form_container" onSubmit={handleLogin}>
                         <div className="logo_container"><img src={logo} alt="" /></div>
                         <div className="title_container">
                             <p className="title">Login na sua conta</p>
@@ -58,7 +97,6 @@ function Login() {
                             </svg>
                             <input
                                 placeholder="xxxxxx@mail.com"
-                                title="Input title"
                                 name="email"
                                 type="email"
                                 className="input_field"
@@ -88,7 +126,6 @@ function Login() {
                             </svg>
                             <input
                                 placeholder="Senha"
-                                title="Input title"
                                 name="password"
                                 type="password"
                                 className="input_field"
@@ -100,6 +137,11 @@ function Login() {
                         <button title="Sign In" type="submit" className="sign-in_btn">
                             <span>Login</span>
                         </button>
+
+                    
+                        {success && <div className='success-message'><FontAwesomeIcon icon={faCircleCheck} className='icons-header' />{success}</div>}
+
+                        {error && <div className='error-message'><FontAwesomeIcon icon={faCircleXmark} className='icons-header' />{error}</div>}
 
                         <div className="separator">
                             <hr className="line" />
@@ -131,7 +173,6 @@ function Login() {
                             </svg>
                             <span>Login com Google</span>
                         </button>
-
                     </form>
                 </div>
                 <div className="img-banner-login" style={{display: "flex", alignItems: "center", justifyContent: "center"}}>

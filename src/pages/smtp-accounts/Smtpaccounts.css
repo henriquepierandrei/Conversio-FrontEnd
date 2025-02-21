@@ -1,6 +1,6 @@
 .container-smtp-account-principal{
     width: 100%;
-    height: min-content;
+    height: 100vh;
     background-color: rgb(235, 235, 236);
     display: flex;
     align-items: center;
@@ -12,15 +12,16 @@
 
 .container-smtp-account, .container-smtp-account-two{
     background-color: rgb(255, 255, 255);
-    max-width: 50%;
-    height: 600px;
+    max-width: 60%;
+    height: auto;
     padding: 15px 15px 20px 15px;
     box-shadow: 2px 5px 15px rgba(0, 0, 0, 0.164);
     border-radius: 1em;
 }
 
 .container-smtp-account-two{
-    max-width: 50%;
+    max-width: 55%;
+    width: 55%;
     height: auto;
 }
 
@@ -37,6 +38,18 @@
     background-color: rgb(19, 141, 255);
     color: white;
 }
+
+
+.form-check-input{
+    cursor: pointer;
+}
+
+.alert{
+    position: fixed;
+    right: 5px;
+    top: 5px;
+}
+
 
 .btn-create-smtp{
     width: 100%;

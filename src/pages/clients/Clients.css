@@ -17,7 +17,7 @@
     justify-content: center;
     align-items: center;
     text-align: center;
-    width: 60%;
+    width: 70%;
     height: auto;
     padding: 10px;
     border-radius: 0.6em;
@@ -69,7 +69,9 @@
     fill: rgba(75, 85, 99, 1);
 }
 
-
+.tb-clients{
+    width: 130dvw;
+}
 
 
 .tb-clients thead th{

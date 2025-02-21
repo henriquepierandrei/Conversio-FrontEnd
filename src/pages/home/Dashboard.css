@@ -85,7 +85,7 @@
     height: auto;
     align-items: center;
     justify-content: space-evenly;
-    background-image: linear-gradient(to right, rgb(30, 86, 138), rgb(106, 119, 184));
+    background-image: linear-gradient(to right, rgb(67, 127, 255), rgb(57, 71, 141));
     padding: 1.5em;
     
 }
@@ -182,7 +182,7 @@
       flex-direction: column;
     }
 
-    .card {
+    .container-fluid > .card {
       background: #fff;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       padding: 20px;

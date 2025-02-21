@@ -5,6 +5,7 @@ import logo from '../../assets/images/logos/Logo.png';
 function Register() {
     return (
         <div className="container-principal-login">
+            
             <div className="container-login">
                 <div style={{ height: "100%", minWidth: "60%" }}>
                     <form className="form_container">

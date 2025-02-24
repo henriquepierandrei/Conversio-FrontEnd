@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../clients/Clients.css';
 import Header from '../../components/header/Header';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelope, faUsersGear, faExclamationCircle, faCalendarDay, faMailBulk, faFilter, faTrash, faFilePen, faArrowLeft, faArrowRight, faCheck, faX } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faArrowRight, faCheck, faX } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 

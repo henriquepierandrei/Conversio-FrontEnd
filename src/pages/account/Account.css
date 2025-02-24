@@ -3,14 +3,38 @@
     height: 100vh;
     display: flex;
     justify-content: center;
+    background-color: rgb(247, 247, 247);
     align-items: center;
     
 }
 
 .container-user{
-    border: 1px solid gray;
-    width: 60%;
-    height: auto;
+    border: 1px solid rgb(241, 241, 241);
+    box-shadow: 2px 5px 10px rgba(0, 0, 0, 0.123);
+    border-radius: 0.4em;
+    width: 550px;
+    height: 550px;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    flex-direction: column;
+    background-color: rgb(255, 255, 255);
+
+}
+
+.container-user-inside{
+    color: rgb(155, 155, 155);
+    font-size: 0.9em;
+    width: 90%;
+    display: flex;
+    padding: 0px 5px 0px 5px;
+    height: 45px;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid rgb(231, 231, 231);
+    border-radius: 0.4em;
+    background-color: rgb(255, 255, 255);
+    margin: 10px auto;
 }
 
 .container-img-logo-account{

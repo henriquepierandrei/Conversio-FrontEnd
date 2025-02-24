@@ -53,7 +53,7 @@ function Dashboard() {
         <div style={{ width: "100%", height: "100vh" }}>
             <div className='container-principal'>
                 <div className='header-button-component'><Header /></div>
-                <div className="card">
+                <div className="card" style={{height: "180px" }}>
                     <div className="title">
                         <span>
                             <FontAwesomeIcon icon={faEnvelope} className='icons-header' />
@@ -72,7 +72,7 @@ function Dashboard() {
                     </div>
                 </div>
 
-                <div className="card">
+                <div className="card" style={{height: "180px" }}>
                     <div className="title">
                         <span>
                             <FontAwesomeIcon icon={faEnvelopeOpenText} className='icons-header' />
@@ -91,7 +91,7 @@ function Dashboard() {
                     </div>
                 </div>
 
-                <div className="card">
+                <div className="card" style={{height: "180px" }}>
                     <div className="title">
                         <span>
                             <FontAwesomeIcon icon={faUsersLine} className='icons-header' />
@@ -110,7 +110,7 @@ function Dashboard() {
                     </div>
                 </div>
 
-                <div className="card">
+                <div className="card" style={{height: "180px" }}>
                     <div className="title">
                         <span>
                             <FontAwesomeIcon icon={faEnvelopeCircleCheck} className='icons-header' />

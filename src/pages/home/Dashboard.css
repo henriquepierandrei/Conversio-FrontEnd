@@ -1,4 +1,6 @@
-/* From Uiverse.io by Yaya12085 */ 
+
+
+
 .card {
     padding: 21.5rem;
     background-color: #fff;
@@ -68,6 +70,15 @@
     height: 0.5rem;
     border-radius: 0.25rem;
   }
+
+  .p-div-container-dashboard{
+    padding: 5px;
+    border: 1px solid rgb(231, 231, 231);
+    border-radius: 10px;
+    padding: 15px;
+    margin-right: 1%;
+  }
+  
   
   .data .range .fill {
     position: absolute;
@@ -180,6 +191,15 @@
   @media (max-width: 768px) {
     .container-principal{
       flex-direction: column;
+    }
+
+    .img-fluid{
+      width: 98%;
+    }
+
+    .div-banner-texts{
+      font-size: 1em;
+        flex-direction: column;
     }
 
     .container-fluid > .card {

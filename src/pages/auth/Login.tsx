@@ -3,12 +3,13 @@ import '../auth/Auth.css';
 import logo from '../../assets/images/logos/Logo.png';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
+import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { faCircleCheck, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 
 function Login() {
+    const { login } = useAuth();
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -20,42 +21,28 @@ function Login() {
         e.preventDefault();
       
         if (!email || !password) {
-            setError("Por favor, preencha todos os campos.");
-            return;
+          setError("Por favor, preencha todos os campos.");
+          return;
         }
+      
         try {
           const response = await axios.post("http://localhost:8080/api/v1/auth/login", {
             email,
             password,
           });
       
-          const { accessToken, refreshToken, accessTokenExpiresIn, refreshTokenExpiresIn } = response.data;
+          const { accessToken, refreshToken } = response.data;
       
-          // Definir expiração dos tokens em segundos
-          const accessTokenExpirationDays = accessTokenExpiresIn / (60 * 60 * 24); // Converter segundos para dias
-          const refreshTokenExpirationDays = refreshTokenExpiresIn / (60 * 60 * 24);
+          // Chama a função `login` do AuthContext para salvar os tokens e atualizar o estado
+          login(accessToken);
       
-          // Armazena os tokens nos cookies
-          Cookies.set("accessToken", accessToken, {
-            expires: accessTokenExpirationDays,
-            secure: true,
-            sameSite: "Strict",
-          });
+          setSuccess("Login bem sucedido!");
       
-          Cookies.set("refreshToken", refreshToken, {
-            expires: refreshTokenExpirationDays,
-            secure: true,
-            sameSite: "Strict",
-          });
-      
-          
-          setSuccess("Login bem sucedido!")
-
+          // Redireciona após 1 segundo
           setTimeout(() => {
             navigate("/dashboard");
           }, 1000);
-          
-
+      
         } catch (err) {
           console.error("Erro no login:", err);
           setError("Credenciais inválidas!");

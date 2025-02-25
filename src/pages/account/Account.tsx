@@ -11,8 +11,8 @@ function Account() {
       <div><Header /></div>
       <div className='container-user sticky-sm-top'>
         <h1 className='title' style={{ padding: "25px" }}><FontAwesomeIcon icon={faGear} style={{ marginRight: "10px" }} />Informações da Conta</h1>
-        
-        
+
+
         <div className='container-user-inside'>
           <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
             <div><p style={{ margin: "1px 0px 0px 10px" }}><FontAwesomeIcon icon={faIdCardAlt} style={{ color: "rgb(136, 164, 255)" }} /> Nome</p></div>
@@ -20,14 +20,20 @@ function Account() {
           </div>
           <div className="btn-group btn-group-sm" role="group" aria-label="Small button group">
             <a className="btn btn-primary" data-bs-toggle="collapse" href="#collapseNome" role="button" aria-expanded="false" aria-controls="collapseNome">
-            <FontAwesomeIcon icon={faPencil} /> Alterar Nome
+              <FontAwesomeIcon icon={faPencil} /> Alterar Nome
             </a>
           </div>
         </div>
-        <div className="collapse" id="collapseNome">
-          <div className="card card-body" style={{ marginTop: "0px" }}>
-            Some placeholder content for the collapse component. This panel is hidden by default but revealed when the user activates the relevant trigger.
-          </div>
+        <div className="collapse" id="collapseNome" style={{minWidth: "90%"}}>
+          <form action="" >
+            <div className="card card-body card-account" style={{ marginTop: "0px",minWidth: "100%" }}>
+              <div className="input-group mb-3"  style={{minWidth: "100%"}}>
+                <span className="input-group-text" id="inputGroup-sizing-default">Nome</span>
+                <input type="text" className="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" />
+                <a href="asdas" className='btn btn-secondary'><FontAwesomeIcon icon={faPencil} style={{ color: "rgb(255, 255, 255)", marginRight: "10px" }} />Alterar Nome</a>
+              </div>
+            </div>
+          </form>
         </div>
 
         <div className='container-user-inside'>
@@ -41,11 +47,7 @@ function Account() {
             </a>
           </div>
         </div>
-        <div className="collapse" id="collapseEmail">
-          <div className="card card-body" style={{ marginTop: "0px" }}>
-            Some placeholder content for the collapse component. This panel is hidden by default but revealed when the user activates the relevant trigger.
-          </div>
-        </div>
+
 
 
         <div className='container-user-inside'>
@@ -59,11 +61,7 @@ function Account() {
             </a>
           </div>
         </div>
-        <div className="collapse" id="collapseSenha">
-          <div className="card card-body" style={{ marginTop: "0px" }}>
-            Some placeholder content for the collapse component. This panel is hidden by default but revealed when the user activates the relevant trigger.
-          </div>
-        </div>
+
 
 
         <div className='container-user-inside'>

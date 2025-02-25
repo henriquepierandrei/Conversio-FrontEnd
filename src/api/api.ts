@@ -57,13 +57,17 @@ export function setupAPIClient(ctx: any = undefined): AxiosInstance {
 
               // Atualiza os cookies com os novos tokens
               setCookie(ctx, "accessToken", newAccessToken, {
-                maxAge: 30 * 24 * 60 * 60,
-                path: "/",
+                maxAge: 30 * 24 * 60 * 60, // 30 dias
+                path: "/", // Disponível em toda a aplicação
+                secure: process.env.NODE_ENV === "false", // Apenas HTTPS em produção
+                sameSite: "lax", // Política de segurança
               });
-
+              
               setCookie(ctx, "refreshToken", newRefreshToken, {
-                maxAge: 30 * 24 * 60 * 60,
+                maxAge: 30 * 24 * 60 * 60, // 30 dias
                 path: "/",
+                secure: process.env.NODE_ENV === "false", // alterar para production quando estiver em producao
+                sameSite: "lax",
               });
 
               // Atualiza o header de autorização com o novo token
@@ -74,7 +78,6 @@ export function setupAPIClient(ctx: any = undefined): AxiosInstance {
               failedRequestQueue = [];
             } catch (refreshError) {
               console.error('Erro ao renovar o token:', refreshError);
-
               // Limpa os cookies e redireciona para o login em caso de erro
               setCookie(ctx, "accessToken", "", { path: "/" });
               setCookie(ctx, "refreshToken", "", { path: "/" });

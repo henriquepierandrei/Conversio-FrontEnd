@@ -1,29 +1,25 @@
-// PrivateRoute.tsx
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useState } from "react";
-import React, { useEffect } from "react"; // Importe o useEffect
+import React from "react";
 
 const PrivateRoute = () => {
-  const { isAuthenticated } = useAuth();
-  const [loading, setLoading] = useState(true);
+  const { isAuthenticated, isLoading } = useAuth();
 
-  useEffect(() => {
-    // Simula uma verificação assíncrona
-    setTimeout(() => setLoading(false), 1000);
-  }, []);
+  console.log("🛡️ PrivateRoute -> isAuthenticated:", isAuthenticated);
+  console.log("🕒 PrivateRoute -> isLoading:", isLoading);
 
-  if (loading) {
-    return <div></div>; // Exibe um loader enquanto verifica a autenticação
+  if (isLoading) {
+    console.log("⏳ Carregando autenticação...");
+    return <div>Carregando...</div>;
   }
 
   if (!isAuthenticated) {
-    console.log("Usuário não autenticado, redirecionando para o login.");
+    console.log("🚫 Usuário não autenticado, redirecionando para o login.");
     return <Navigate to="/login" replace />;
   }
 
+  console.log("✅ Usuário autenticado, renderizando página.");
   return <Outlet />;
 };
-
 
 export default PrivateRoute;

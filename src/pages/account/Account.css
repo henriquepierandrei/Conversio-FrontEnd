@@ -22,6 +22,16 @@
 
 }
 
+.card-account{
+    min-width: 90%; 
+    padding: 8px;
+    height: max-content;
+}
+
+.btn-secondary{
+    font-size: 0.9em;
+}
+
 .container-user-inside{
     color: rgb(155, 155, 155);
     font-size: 0.9em;

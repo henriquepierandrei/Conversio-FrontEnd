@@ -4,7 +4,7 @@ import { parseCookies, setCookie } from "nookies";
 // Contexto de autenticação
 interface AuthContextType {
   isAuthenticated: boolean;
-  isLoading: boolean; // Novo estado para controlar o carregamento
+  isLoading: boolean;
   login: (token: string) => void;
   logout: () => void;
 }
@@ -13,35 +13,54 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // Estado de carregamento
+  const [isLoading, setIsLoading] = useState(true);
 
   // Função para verificar a autenticação
+  useEffect(() => {
+    console.log("🔄 Verificando autenticação...");
+    checkAuth();
+  }, []);
+
   const checkAuth = () => {
     const token = parseCookies()["accessToken"];
-    console.log("Token encontrado:", token); // Verifique se o token está sendo recuperado
+    console.log("📌 Token encontrado no cookie:", token);
+
     if (token) {
-      console.log("Token existe, autenticando...");
+      console.log("✅ Token existe! Usuário autenticado.");
       setIsAuthenticated(true);
     } else {
-      console.log("Token não encontrado, usuário não autenticado.");
+      console.log("❌ Nenhum token encontrado. Usuário não autenticado.");
       setIsAuthenticated(false);
     }
-    setIsLoading(false); // Finaliza o carregamento após verificar a autenticação
+    setIsLoading(false);
   };
-
-  // Verifica a autenticação ao carregar o componente
-  useEffect(() => {
-    checkAuth(); // Verifica a autenticação ao carregar
-  }, []);
 
   // Função de login
   const login = async (token: string) => {
+    // Salva o token no cookie
     setCookie(null, "accessToken", token, {
       maxAge: 30 * 24 * 60 * 60, // 30 dias
       path: "/",
+      secure: process.env.NODE_ENV === "production", // Apenas HTTPS em produção
+      sameSite: "lax", // Política de segurança
     });
-    console.log("Token salvo:", parseCookies()["accessToken"]); // Verifica se o token foi salvo corretamente
-    await checkAuth(); // Aguarda a verificação da autenticação
+  
+    console.log("🔑 Token salvo:", token);
+  
+    // Aguarda um pequeno atraso para garantir que o cookie seja salvo
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  
+    // Verifica se o cookie foi salvo corretamente
+    const savedToken = parseCookies()["accessToken"];
+    console.log("📌 Cookie salvo:", savedToken);
+  
+    // Atualiza o estado de autenticação
+    if (savedToken) {
+      setIsAuthenticated(true);
+      setIsLoading(false);
+    } else {
+      console.error("❌ Erro: Cookie não foi salvo corretamente.");
+    }
   };
 
   // Função de logout

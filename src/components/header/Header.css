@@ -13,28 +13,32 @@ a{
     position: absolute;
     left: 0.5em;
     top: 0.5em;
-    background-color: rgb(181, 226, 255);
     padding: 10px;
-    color: rgb(49, 50, 83);
+    color: rgb(61, 61, 61);
+    background-color: rgb(255, 255, 255);
     font-weight: 700;
     border-radius: 100%;
+    font-size: 1.5em;
     cursor: pointer;
     transition: 1s;
 }
+.material-symbols-outlined:hover{
+    transition: 1s;
+    transform: scale(1.1);
+    color: rgb(255, 255, 255);
+    background-color: rgb(61, 61, 61);;
+}
+
 
 .accordion-button:hover{
-    background-color: rgb(220, 220, 255);
+    background-color: rgb(255, 255, 255);
 }
 
 .no-arrow::after{
     display: none;
 }
 
-.material-symbols-outlined:hover{
-    background-color: rgb(255, 255, 255);
-    transition: 1s;
-    color: rgb(129, 131, 240);
-}
+
 
 .btn-header{
     transition: 1s;

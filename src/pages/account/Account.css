@@ -3,7 +3,7 @@
     height: 100vh;
     display: flex;
     justify-content: center;
-    background-color: rgb(247, 247, 247);
+    background-image: linear-gradient(to right, rgb(207, 207, 207), rgb(221, 234, 255));
     align-items: center;
     
 }

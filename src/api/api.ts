@@ -11,15 +11,39 @@ interface ErrorResponse {
 }
 
 // Função para verificar se o token expirou
-const isTokenExpired = (token: string): boolean => {
+export const isTokenExpired = (token: string): boolean => {
   try {
+    // 1. Decodifica o payload do token (parte do meio do JWT)
     const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.exp * 1000 < Date.now();
+
+    // 2. Obtém o tempo de expiração (em segundos)
+    const tokenExpiry = payload.exp;
+
+    // 3. Obtém o tempo atual (em segundos)
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    // 4. Converte os timestamps para datas no formato pt-BR
+    const formatDate = (timestampInSeconds: number): string => {
+      const date = new Date(timestampInSeconds * 1000); // Converte para milissegundos
+      return date.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }); // Formato brasileiro
+    };
+
+    // 5. Exibe os valores para depuração
+    console.log("Payload do token:", payload);
+    console.log("Hora atual (currentTime):", formatDate(currentTime));
+    console.log("Token expira em (tokenExpiry):", formatDate(tokenExpiry));
+    console.log("Token está expirado? ", tokenExpiry < currentTime);
+
+    // 6. Retorna true se o token estiver expirado, false caso contrário
+    return tokenExpiry < currentTime;
   } catch (error) {
+    // 7. Em caso de erro (token inválido, formato incorreto, etc.), considera como expirado
     console.error('Erro ao verificar expiração do token:', error);
-    return true; // Considera como expirado em caso de erro
+    return true;
   }
 };
+
+
 
 // Função para configurar a instância do Axios com cookies e interceptores
 export function setupAPIClient(ctx: any = undefined): AxiosInstance {

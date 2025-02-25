@@ -1,5 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { parseCookies, setCookie } from "nookies";
+import axios from 'axios';
+import {isTokenExpired} from '../api/api'
+
+
 
 // Contexto de autenticação
 interface AuthContextType {
@@ -21,19 +25,47 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     checkAuth();
   }, []);
 
-  const checkAuth = () => {
+  const checkAuth = async () => {
     const token = parseCookies()["accessToken"];
-    console.log("📌 Token encontrado no cookie:", token);
-
-    if (token) {
-      console.log("✅ Token existe! Usuário autenticado.");
-      setIsAuthenticated(true);
-    } else {
+  
+    if (!token) {
       console.log("❌ Nenhum token encontrado. Usuário não autenticado.");
       setIsAuthenticated(false);
+      setIsLoading(false);
+      return;
     }
+  
+    if (isTokenExpired(token)) {
+      console.log("⏳ Token expirado. Tentando renovar...");
+  
+      try {
+        const refreshToken = parseCookies()["refreshToken"];
+        if (!refreshToken) throw new Error("Refresh token não encontrado");
+  
+        const response = await axios.post("http://localhost:8080/api/v1/auth/refresh", {
+          refreshToken,
+        });
+  
+        const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data;
+  
+        // Atualiza os cookies com os novos tokens
+        setCookie(null, "accessToken", newAccessToken, { maxAge: 30 * 24 * 60 * 60, path: "/" });
+        setCookie(null, "refreshToken", newRefreshToken, { maxAge: 30 * 24 * 60 * 60, path: "/" });
+  
+        console.log("✅ Token renovado. Usuário autenticado.");
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error("❌ Erro ao renovar o token:", error);
+        logout();
+      }
+    } else {
+      console.log("✅ Token válido! Usuário autenticado.");
+      setIsAuthenticated(true);
+    }
+  
     setIsLoading(false);
   };
+  
 
   // Função de login
   const login = async (token: string) => {

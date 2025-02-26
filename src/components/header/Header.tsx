@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUsersRectangle, faPlusCircle, faMinusCircle, faRotate, faSearch, faMailBulk, faPaperPlane, faBorderTopLeft, faTimeline, faCalendar, faGears, faTrash, faChevronDown, faChevronUp, faUserPlus, faUserMinus, faUserGear, faAddressCard, faEdit, faHeader, faDownLong, faSquare, faX, faUser, faGear, faUserEdit, faBookOpen, faHistory, faUsersBetweenLines, faUsersViewfinder, faPersonChalkboard, faUsersGear, faDashboard } from '@fortawesome/free-solid-svg-icons';
+import { faUsersRectangle, faPlusCircle, faMinusCircle, faRotate, faSearch, faMailBulk, faPaperPlane, faBorderTopLeft, faTimeline, faCalendar, faGears, faTrash, faChevronDown, faChevronUp, faUserPlus, faUserMinus, faUserGear, faAddressCard, faEdit, faHeader, faDownLong, faSquare, faX, faUser, faGear, faUserEdit, faBookOpen, faHistory, faUsersBetweenLines, faUsersViewfinder, faPersonChalkboard, faUsersGear, faDashboard, faBars } from '@fortawesome/free-solid-svg-icons';
 
 import '../header/Header.css'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'; // Import necessário para os componentes funcionarem
@@ -26,7 +26,7 @@ function Header() {
   return (
     <div className="container mt-5">
       <button className="btn-canvas" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
-        <span className="material-symbols-outlined">view_object_track</span>
+        <span className="material-symbols-outlined"><FontAwesomeIcon icon={faBars} style={{fontWeight: "900"}}/></span>
       </button>
       <div className="offcanvas offcanvas-start" tabIndex={-1} id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
         <div className="offcanvas-header" style={{ padding: "2% 5% 0% 5%" }}>

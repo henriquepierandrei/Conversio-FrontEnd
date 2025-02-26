@@ -14,6 +14,10 @@ a{
     left: 0.5em;
     top: 0.5em;
     padding: 10px;
+    width: max-content;
+    display: flex;
+    align-items: center;
+    height: 40px;
     color: rgb(61, 61, 61);
     background-color: rgb(255, 255, 255);
     font-weight: 700;

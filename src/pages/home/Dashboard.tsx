@@ -3,7 +3,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import '../home/Dashboard.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelope, faEnvelopeOpenText, faUsersLine, faEnvelopeCircleCheck, faArrowRight, faFilter, faChartSimple } from '@fortawesome/free-solid-svg-icons';
+import { faEnvelope, faEnvelopeOpenText, faUsersLine, faEnvelopeCircleCheck, faFilter, faArrowRight, faChartSimple } from '@fortawesome/free-solid-svg-icons';
 import Header from '../../components/header/Header';
 import Logs from '../../components/logs/Logs';
 import banner from "../../assets/images/banner-dashboard.jpg";
@@ -11,11 +11,17 @@ import banner from "../../assets/images/banner-dashboard.jpg";
 function Dashboard() {
     const [dashboardData, setDashboardData] = useState({
         emailsSentToday: 0,
-        totalEmailsSent: 0,
+        totalEmailsSended: 0,
         totalClients: 0,
         fullEmailCapicity: 0
-
     });
+    const [progressEmailSentToday, setProgressEmailSentToday] = useState(0);
+    const [progressTotalEmailsSended, setProgressTotalEmailsSended] = useState(0);
+    const [progressTotalClients, setProgressTotalClients] = useState(0);
+    const [progressFullEmailCapicity, setProgressFullEmailCapicity] = useState(0);
+
+
+
     const [error, setError] = useState<string | null>(null);
 
     const fetchDashboardData = async () => {
@@ -32,23 +38,83 @@ function Dashboard() {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            // Atribuindo valores padrão 0 caso algum campo seja null ou undefined
             setDashboardData({
                 emailsSentToday: response.data.emailsSentToday ?? 0,
-                totalEmailsSent: response.data.totalEmailsSent ?? 0,
+                totalEmailsSended: response.data.totalEmailsSended ?? 0,
                 totalClients: response.data.totalClients ?? 0,
                 fullEmailCapicity: response.data.fullEmailCapicity ?? 0
-
             });
         } catch (err) {
             setError("Falha ao buscar dados do dashboard: " + (err.response?.data?.message || err.message));
         }
     };
 
-
     useEffect(() => {
         fetchDashboardData();
     }, []);
+
+    useEffect(() => {
+        // Função para aumentar a barra de progresso gradualmente
+        const intervalTime = 10; // Intervalo em ms para cada aumento
+        const maxProgressEmailSentToday = (dashboardData.emailsSentToday / 100) * 100;
+        const maxProgressTotalEmailsSended = (dashboardData.totalEmailsSended / 100) * 100;
+        const maxProgressTotalClients = (dashboardData.totalClients / 100) * 100;
+        const maxProgressFullEmailCapicity = (dashboardData.fullEmailCapicity / 100) * 100;
+
+        // Email Sent Today
+        const progressInterval = setInterval(() => {
+            setProgressEmailSentToday((prev) => {
+                if (prev >= maxProgressEmailSentToday) {
+                    clearInterval(progressInterval);  // Limpeza após alcançar o valor máximo
+                    return maxProgressEmailSentToday;
+                }
+                return prev + 1;
+            });
+        }, intervalTime);
+
+        // Total Emails Sent
+        const progressInterval2 = setInterval(() => {
+            setProgressTotalEmailsSended((prev) => {
+                if (prev >= maxProgressTotalEmailsSended) {
+                    clearInterval(progressInterval2);  // Limpeza após alcançar o valor máximo
+                    return maxProgressTotalEmailsSended;
+                }
+                return prev + 1;
+            });
+        }, intervalTime);
+
+        // Total Clients
+        const progressInterval3 = setInterval(() => {
+            setProgressTotalClients((prev) => {
+                if (prev >= maxProgressTotalClients) {
+                    clearInterval(progressInterval3);  // Limpeza após alcançar o valor máximo
+                    return maxProgressTotalClients;
+                }
+                return prev + 1;
+            });
+        }, intervalTime);
+
+        // Full Email Capacity
+        const progressInterval4 = setInterval(() => {
+            setProgressFullEmailCapicity((prev) => {
+                if (prev >= maxProgressFullEmailCapicity) {
+                    clearInterval(progressInterval4);  // Limpeza após alcançar o valor máximo
+                    return maxProgressFullEmailCapicity;
+                }
+                return prev + 20;
+            });
+        }, intervalTime);
+
+        // Limpeza dos intervalos ao desmontar o componente
+        return () => {
+            clearInterval(progressInterval);
+            clearInterval(progressInterval2);
+            clearInterval(progressInterval3);
+            clearInterval(progressInterval4);
+        };
+
+    }, [dashboardData]);
+
 
     return (
         <div style={{ width: "100%", height: "auto", paddingBottom: "50px" }}>
@@ -59,16 +125,12 @@ function Dashboard() {
                         <span>
                             <FontAwesomeIcon icon={faEnvelope} className='icons-header' />
                         </span>
-                        <p className="title-text">
-                            Emails Enviados Hoje
-                        </p>
+                        <p className="title-text">Emails Enviados Hoje</p>
                     </div>
                     <div className="data">
-                        <p>
-                            {dashboardData.emailsSentToday}
-                        </p>
+                        <p>{dashboardData.emailsSentToday}</p>
                         <div className="range">
-                            <div className="fill" style={{ width: `${(dashboardData.emailsSentToday / 100) * 100}%` }}></div>
+                            <div className="fill" style={{ width: `${progressEmailSentToday}%` }}></div>
                         </div>
                     </div>
                 </div>
@@ -78,16 +140,12 @@ function Dashboard() {
                         <span>
                             <FontAwesomeIcon icon={faEnvelopeOpenText} className='icons-header' />
                         </span>
-                        <p className="title-text">
-                            Total de Emails Enviados
-                        </p>
+                        <p className="title-text">Total de Emails Enviados</p>
                     </div>
                     <div className="data">
-                        <p>
-                            {dashboardData.totalEmailsSent}
-                        </p>
+                        <p>{progressTotalEmailsSended.toFixed(0)}</p>
                         <div className="range">
-                            <div className="fill" style={{ width: `${(dashboardData.totalEmailsSent / 100) * 100}%` }}></div>
+                            <div className="fill" style={{ width: `${progressTotalEmailsSended}%` }}></div>
                         </div>
                     </div>
                 </div>
@@ -97,16 +155,12 @@ function Dashboard() {
                         <span>
                             <FontAwesomeIcon icon={faUsersLine} className='icons-header' />
                         </span>
-                        <p className="title-text">
-                            Total de Clientes
-                        </p>
+                        <p className="title-text">Total de Clientes</p>
                     </div>
                     <div className="data">
-                        <p>
-                            {dashboardData.totalClients}/100
-                        </p>
+                        <p>{progressTotalClients}/100</p>
                         <div className="range">
-                            <div className="fill" style={{ width: `${(dashboardData.totalClients / 100) * 100}%` }}></div>
+                            <div className="fill" style={{ width: `${progressTotalClients}%` }}></div>
                         </div>
                     </div>
                 </div>
@@ -116,19 +170,17 @@ function Dashboard() {
                         <span>
                             <FontAwesomeIcon icon={faEnvelopeCircleCheck} className='icons-header' />
                         </span>
-                        <p className="title-text">
-                            Capacidade Total de Envios
-                        </p>
+                        <p className="title-text">Capacidade Total de Envios</p>
                     </div>
                     <div className="data">
-                        <p>
-                            {dashboardData.fullEmailCapicity}/5000
-                        </p>
+                        <p>{progressFullEmailCapicity}/5000</p>
                         <div className="range">
-                            <div className="fill" style={{ width: `${(dashboardData.fullEmailCapicity / 100) * 5}%` }}></div>
+                            <div className="fill"
+                                style={{ width: `${((progressFullEmailCapicity) / 5000) * 100}%` }}>
+                            </div>
+
                         </div>
                     </div>
-
                 </div>
             </div>
             <div className='line-separator'></div>
@@ -136,27 +188,26 @@ function Dashboard() {
                 <Logs />
             </div>
             <div style={{ width: "100%", margin: "auto", display: "flex", gap: "10px" }} className='div-banner-texts'>
-                <div style={{width: "100%"}}>
-                <img src={banner} className="img-fluid" alt="..." style={{ borderRadius: "0.8em", height: "50vh", marginLeft: "1%" }} />
+                <div style={{ width: "100%", marginLeft: "1%" }}>
+                    <img src={banner} className="img-fluid" alt="..." style={{ borderRadius: "0.8em", height: "50vh", marginLeft: "1%" }} />
                 </div>
                 <div style={{ maxWidth: "100%" }} className='p-div-container-dashboard'>
-                    <h1 className='title' style={{fontSize: "3em", padding: "20px", textAlign:"start", lineHeight: "1em"}}>Oque você precisa saber sobre Automação de E-mails</h1>
-                    <p style={{color: "gray", fontSize: "1.5em"}}>
+                    <h1 className='title' style={{ fontSize: "3em", padding: "20px", textAlign: "start", lineHeight: "1em" }}>O que você precisa saber sobre Automação de E-mails</h1>
+                    <p style={{ color: "gray", fontSize: "1.5em" }}>
                         A automação de e-mails permite que você envie <strong>mensagens personalizadas</strong>
-                         no momento certo para cada lead ou cliente, <strong>aumentando as chances de
-                         engajamento e conversão</strong>. Com ela, é possível criar fluxos de nutrição,
+                        no momento certo para cada lead ou cliente, <strong>aumentando as chances de
+                            engajamento e conversão</strong>. Com ela, é possível criar fluxos de nutrição,
                         segmentar contatos e otimizar suas campanhas de marketing digital.
                     </p><hr />
-                    <ul style={{color: "gray"}}>
-                        <li style={{fontSize:"1.3em"}}> <FontAwesomeIcon icon={faArrowRight} style={{color: "rgb(49, 118, 182)"}}/> Fluxos de automação para cada etapa do objetivo!</li>
-                        <li style={{fontSize:"1.3em"}}> <FontAwesomeIcon icon={faFilter} style={{color: "rgb(49, 118, 182)"}}/> Segmentação avançada de leads</li>
-                        <li style={{fontSize:"1.3em"}}> <FontAwesomeIcon icon={faChartSimple} style={{color: "rgb(49, 118, 182)"}}/> Métricas para otimizar resultados</li>
+                    <ul style={{ color: "gray" }}>
+                        <li style={{ fontSize: "1.3em" }}> <FontAwesomeIcon icon={faArrowRight} style={{ color: "rgb(49, 118, 182)" }} /> Fluxos de automação para cada etapa do objetivo!</li>
+                        <li style={{ fontSize: "1.3em" }}> <FontAwesomeIcon icon={faFilter} style={{ color: "rgb(49, 118, 182)" }} /> Segmentação avançada de leads</li>
+                        <li style={{ fontSize: "1.3em" }}> <FontAwesomeIcon icon={faChartSimple} style={{ color: "rgb(49, 118, 182)" }} /> Métricas para otimizar resultados</li>
                     </ul>
                 </div>
             </div>
-
         </div>
-    )
+    );
 }
 
 export default Dashboard;

@@ -1,79 +1,181 @@
-import React from 'react'
-import '../account/Account.css'
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import '../account/Account.css';
 import Header from '../../components/header/Header';
-import logo from '../../assets/images/logos/Logo.png'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faArrowRight, faCalendar, faCheck, faEnvelope, faEye, faGear, faIdCard, faIdCardAlt, faLock, faPencil, faX } from '@fortawesome/free-solid-svg-icons';
+import { faPencil, faSave, faTimes } from '@fortawesome/free-solid-svg-icons';
+import Cookies from 'js-cookie';
 
 function Account() {
+  // Estado para armazenar os dados do usuário
+  const [user, setUser] = useState({
+    companyName: '',
+    email: '',
+    createdAt: '',
+    accountId: ''
+  });
+
+  
+
+  // Estado para controlar a edição dos campos
+  const [isEditing, setIsEditing] = useState({
+    companyName: false
+  });
+
+  // Estado para armazenar a mensagem de erro ou sucesso
+  const [message, setMessage] = useState({ text: '', type: '' });
+
+  // Buscar os dados do usuário ao carregar a página
+  const fetchUserData = async () => {
+    const token = Cookies.get('accessToken');
+    if (!token) {
+      alert('Usuário não autenticado. Faça login novamente.');
+      return;
+    }
+
+    try {
+      const response = await axios.get('http://localhost:8080/api/v1/user/get', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUser({
+        companyName: response.data.companyName,
+        email: response.data.email,
+        createdAt: response.data.createdAt,
+        accountId: response.data.accountId
+      });
+    } catch (err) {
+      console.error('Erro ao buscar dados do usuário:', err);
+      setMessage({ text: 'Erro ao buscar os dados do usuário.', type: 'error' });
+    }
+  };
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  // Função para permitir a edição de um campo específico
+  const handleEdit = (field: string) => {
+    setIsEditing((prevState) => ({
+      ...prevState,
+      [field]: true
+    }));
+  };
+
+  // Função para salvar as alterações
+  const handleSave = async () => {
+    const token = Cookies.get('accessToken');
+    if (!token) {
+      alert('Usuário não autenticado. Faça login novamente.');
+      return;
+    }
+
+    try {
+      await axios.put(
+        `http://localhost:8080/api/v1/user/update/company-name`,
+        { companyName: user.companyName },
+        {
+          params: { companyName: user.companyName },
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      setIsEditing({ companyName: false });
+      setMessage({ text: 'Nome da empresa atualizado com sucesso!', type: 'success' });
+    } catch (err) {
+      console.error('Erro ao salvar alterações:', err);
+      setMessage({ text: 'Erro ao salvar as alterações.', type: 'error' });
+    }
+  };
+
+  // Função para fechar a mensagem
+  const closeMessage = () => {
+    setMessage({ text: '', type: '' });
+  };
+
   return (
     <div className='container-user-principal'>
       <div><Header /></div>
-      <div className='container-user sticky-sm-top'>
-        <h1 className='title' style={{ padding: "25px" }}><FontAwesomeIcon icon={faGear} style={{ marginRight: "10px" }} />Informações da Conta</h1>
+      <div className='container-user'>
+        <div className="profile-settings">
+          <h1>Conta</h1>
+          <p>Altere os seus dados como preferir.</p>
 
+          {/* Mensagem de sucesso ou erro */}
+          {message.text && (
+            <div className={`message ${message.type}`}>
+              {message.text}
+              <button className="close-button" onClick={closeMessage} style={{marginLeft: "15px"}}>
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
+            </div>
+          )}
 
-        <div className='container-user-inside'>
-          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            <div><p style={{ margin: "1px 0px 0px 10px" }}><FontAwesomeIcon icon={faIdCardAlt} style={{ color: "rgb(136, 164, 255)" }} /> Nome</p></div>
-            <div><p style={{ margin: "1px 10px 0px 0px" }}>*******************</p></div>
+          <div className="image-upload">
+            <img src="https://www.w3schools.com/w3images/avatar2.png" alt="profile" className="profile-image" />
+            <p>Image must be 256×256 - Max 2MB</p>
+            <div className="image-actions">
+              <button className="upload-button">Upload Image</button>
+              <button className="delete-button">Delete Image</button>
+            </div>
           </div>
-          <div className="btn-group btn-group-sm" role="group" aria-label="Small button group">
-            <a className="btn btn-primary" data-bs-toggle="collapse" href="#collapseNome" role="button" aria-expanded="false" aria-controls="collapseNome">
-              <FontAwesomeIcon icon={faPencil} /> Alterar Nome
-            </a>
-          </div>
-        </div>
-        <div className="collapse" id="collapseNome" style={{minWidth: "90%"}}>
-          <form action="" >
-            <div className="card card-body card-account" style={{ marginTop: "0px",minWidth: "100%" }}>
-              <div className="input-group mb-3"  style={{minWidth: "100%"}}>
-                <span className="input-group-text" id="inputGroup-sizing-default">Nome</span>
-                <input type="text" className="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" />
-                <a href="asdas" className='btn btn-secondary'><FontAwesomeIcon icon={faPencil} style={{ color: "rgb(255, 255, 255)", marginRight: "10px" }} />Alterar Nome</a>
+
+          <div className="form-grid">
+            <div className="form-group">
+              <label>Nome da Empresa</label>
+              <div className="input-with-icon">
+                <input
+                  type="text"
+                  value={user.companyName}
+                  onChange={(e) => setUser({ ...user, companyName: e.target.value })}
+                  disabled={!isEditing.companyName}
+                />
+                <button className='update-button-data-profile' onClick={() => handleEdit('companyName')}>
+                  <FontAwesomeIcon icon={faPencil} />
+                </button>
               </div>
             </div>
-          </form>
-        </div>
 
-        <div className='container-user-inside'>
-          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            <div><p style={{ margin: "1px 0px 0px 10px" }}><FontAwesomeIcon icon={faEnvelope} style={{ color: "rgb(136, 164, 255)" }} /> Email</p></div>
-            <div><p style={{ margin: "1px 10px 0px 0px" }}>*******************</p></div>
+            <div className="form-group">
+              <label>Email</label>
+              <div className="input-with-icon">
+                <input
+                  type="email"
+                  value={user.email}
+                  disabled
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>Criado em</label>
+              <div className="input-with-icon">
+                <input type="text" value={user.createdAt} />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label>ID da Conta</label>
+              <div className="input-with-icon">
+                <input
+                  type="email"
+                  value={user.accountId}
+                  disabled
+                />
+              </div>
+            </div>
           </div>
-          <div className="btn-group btn-group-sm" role="group" aria-label="Small button group">
-            <a className="btn btn-primary" data-bs-toggle="collapse" href="#collapseEmail" role="button" aria-expanded="false" aria-controls="collapseEmail">
-              <FontAwesomeIcon icon={faPencil} /> Alterar Email
-            </a>
-          </div>
-        </div>
 
-
-
-        <div className='container-user-inside'>
-          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            <div><p style={{ margin: "1px 0px 0px 10px" }}><FontAwesomeIcon icon={faLock} style={{ color: "rgb(136, 164, 255)" }} /> Senha</p></div>
-            <div><p style={{ margin: "1px 10px 0px 0px" }}>*******************</p></div>
-          </div>
-          <div className="btn-group btn-group-sm" role="group" aria-label="Small button group">
-            <a className="btn btn-primary" data-bs-toggle="collapse" href="#collapseSenha" role="button" aria-expanded="false" aria-controls="collapseSenha">
-              <FontAwesomeIcon icon={faPencil} /> Alterar Senha
-            </a>
-          </div>
-        </div>
-
-
-
-        <div className='container-user-inside'>
-          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            <div><p style={{ margin: "1px 0px 0px 10px" }}><FontAwesomeIcon icon={faCalendar} style={{ color: "rgb(136, 164, 255)" }} /> Conta criada em:</p></div>
-            <div><p style={{ margin: "1px 10px 0px 0px" }}>11/11/1111</p></div>
+          <div className="form-actions">
+            <button className="cancel-button" onClick={() => setIsEditing({ companyName: false })}>
+              Cancel
+            </button>
+            <button className="save-button" onClick={handleSave}>
+              <FontAwesomeIcon icon={faSave} /> Save Changes
+            </button>
           </div>
         </div>
       </div>
-
     </div>
-  )
+  );
 }
 
-export default Account
+export default Account;

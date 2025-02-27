@@ -19,7 +19,7 @@ a{
     align-items: center;
     height: 40px;
     color: rgb(61, 61, 61);
-    background-color: rgb(255, 255, 255);
+    background-color: transparent;
     font-weight: 700;
     border-radius: 100%;
     font-size: 1.5em;
@@ -28,9 +28,8 @@ a{
 }
 .material-symbols-outlined:hover{
     transition: 1s;
-    transform: scale(1.1);
-    color: rgb(255, 255, 255);
-    background-color: rgb(61, 61, 61);;
+    color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.123);;
 }
 
 

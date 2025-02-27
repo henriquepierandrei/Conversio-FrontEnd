@@ -11,6 +11,7 @@ import PrivateRoute from "./routes/PrivateRoute";
 import PublicRoute from "./routes/PublicRoute";
 import { useAuth } from "./context/AuthContext"; // Importe o hook useAuth
 import SendEmail from "./pages/SendEmail/sendEmail";
+import LogsPage from "./pages/logs/LogsPage";
 
 function App() {
   const { isAuthenticated } = useAuth(); // Obtenha o estado de autenticação
@@ -31,7 +32,8 @@ function App() {
           <Route path="/contas-smtp" element={<Smtpaccounts />} />
           <Route path="/temas" element={<Themes />} />
           <Route path="/conta" element={<Account />} />
-          <Route path="/enviar" element={<SendEmail />} />
+          <Route path="/enviar" element={<SendEmail />} />\
+          <Route path="/logs" element={<LogsPage />} />
 
         </Route>
 
@@ -39,7 +41,7 @@ function App() {
         <Route
           path="*"
           element={
-            isAuthenticated ? ( // Use isAuthenticated aqui
+            isAuthenticated ? (
               <Navigate to="/dashboard" replace />
             ) : (
               <Navigate to="/login" replace />

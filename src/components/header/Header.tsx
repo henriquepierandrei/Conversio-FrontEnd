@@ -71,7 +71,7 @@ function Header() {
             <div id="flush-collapseEmail" className="accordion-collapse collapse" data-bs-parent="#accordionEmail">
               <a href="/enviar"><button className='btn-header'><FontAwesomeIcon icon={faPaperPlane} className='icons-header' />Enviar</button></a>
               <a href="/temas"><button className='btn-header'><FontAwesomeIcon icon={faBorderTopLeft} className='icons-header' />Temas</button></a>
-              <a href="#"><button className='btn-header'><FontAwesomeIcon icon={faHistory} className='icons-header' />Logs</button></a>
+              <a href="/logs"><button className='btn-header'><FontAwesomeIcon icon={faHistory} className='icons-header' />Logs</button></a>
             </div>
           </div>
         </div>

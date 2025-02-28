@@ -7,6 +7,10 @@ import { faEnvelope, faEnvelopeOpenText, faUsersLine, faEnvelopeCircleCheck, faF
 import Header from '../../components/header/Header';
 import Logs from '../../components/logs/Logs';
 import banner from "../../assets/images/banner-dashboard.jpg";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import Faq from '../../components/footer/Faq';
+import EmailAutomationIcons from '../../components/home/EmailAutomationIcons';
+
 
 function Dashboard() {
     const [dashboardData, setDashboardData] = useState({
@@ -19,8 +23,26 @@ function Dashboard() {
     const [progressTotalEmailsSended, setProgressTotalEmailsSended] = useState(0);
     const [progressTotalClients, setProgressTotalClients] = useState(0);
     const [progressFullEmailCapicity, setProgressFullEmailCapicity] = useState(0);
-
-
+    
+    const data = [
+        {
+            name: 'Emails Enviados nas Últimas 24h',
+            Valor: dashboardData.quantityEmailsIn24h,
+        },
+        {
+            name: 'Total de Emails Enviados',
+            Valor: progressTotalEmailsSended,
+        },
+        {
+            name: 'Total de Clientes',
+            Valor: progressTotalClients,
+        },
+        {
+            name: 'Capacidade Total de Envios',
+            Valor: progressFullEmailCapicity,
+        },
+    ];
+    
 
     const [error, setError] = useState<string | null>(null);
 
@@ -183,9 +205,26 @@ function Dashboard() {
                     </div>
                 </div>
             </div>
-            <div className='line-separator'></div>
-            
-
+            <div className='line-separator'></div><br />
+            {/* Adicionando o gráfico Recharts */}
+            <div className="graphic" style={{ height: "400px" }}>
+                <div className="title">
+                    <FontAwesomeIcon icon={faChartSimple} className='icons-header' />
+                    <p className="title-text">Gráfico de Progresso</p>
+                </div>
+                <ResponsiveContainer width="80%" height="100%">
+                    <BarChart data={data}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Bar dataKey="Valor" fill="#8884d8"  radius={[5, 5, 5, 5]} style={{cursor: "pointer"}}/>
+                    </BarChart>
+                </ResponsiveContainer>
+            </div>
+            <EmailAutomationIcons />
+            <Faq />
         </div>
     );
 }

@@ -148,7 +148,7 @@ function Account() {
             <div className="form-group">
               <label>Criado em</label>
               <div className="input-with-icon">
-                <input type="text" value={user.createdAt} />
+                <input type="text" value={user.createdAt} style={{color:"gray"}}/>
               </div>
             </div>
 
@@ -159,6 +159,7 @@ function Account() {
                   type="email"
                   value={user.accountId}
                   disabled
+                  style={{color:"gray"}}
                 />
               </div>
             </div>
@@ -169,7 +170,7 @@ function Account() {
               Cancel
             </button>
             <button className="save-button" onClick={handleSave}>
-              <FontAwesomeIcon icon={faSave} /> Save Changes
+              <FontAwesomeIcon icon={faSave} /> Salvar
             </button>
           </div>
         </div>

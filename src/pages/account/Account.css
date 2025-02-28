@@ -150,6 +150,10 @@
     font-weight: bold;
     text-align: center;
   }
+
+  .icon{
+    top: 70%;
+  }
   
   .message.success {
     background-color: #4caf50;

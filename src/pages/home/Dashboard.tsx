@@ -10,7 +10,7 @@ import banner from "../../assets/images/banner-dashboard.jpg";
 
 function Dashboard() {
     const [dashboardData, setDashboardData] = useState({
-        emailsSentToday: 0,
+        quantityEmailsIn24h: 0,
         totalEmailsSended: 0,
         totalClients: 0,
         fullEmailCapicity: 0
@@ -39,7 +39,7 @@ function Dashboard() {
             );
 
             setDashboardData({
-                emailsSentToday: response.data.emailsSentToday ?? 0,
+                quantityEmailsIn24h: response.data.quantityEmailsIn24h ?? 0,
                 totalEmailsSended: response.data.totalEmailsSended ?? 0,
                 totalClients: response.data.totalClients ?? 0,
                 fullEmailCapicity: response.data.fullEmailCapicity ?? 0
@@ -56,7 +56,7 @@ function Dashboard() {
     useEffect(() => {
         // Função para aumentar a barra de progresso gradualmente
         const intervalTime = 10; // Intervalo em ms para cada aumento
-        const maxProgressEmailSentToday = (dashboardData.emailsSentToday / 100) * 100;
+        const maxProgressEmailSentToday = (dashboardData.quantityEmailsIn24h / 100) * 100;
         const maxProgressTotalEmailsSended = (dashboardData.totalEmailsSended / 100) * 100;
         const maxProgressTotalClients = (dashboardData.totalClients / 100) * 100;
         const maxProgressFullEmailCapicity = (dashboardData.fullEmailCapicity / 100) * 100;
@@ -125,12 +125,12 @@ function Dashboard() {
                         <span>
                             <FontAwesomeIcon icon={faEnvelope} className='icons-header' />
                         </span>
-                        <p className="title-text">Emails Enviados Hoje</p>
+                        <p className="title-text">Emails Enviados nas últimas 24h</p>
                     </div>
                     <div className="data">
-                        <p>{dashboardData.emailsSentToday}</p>
+                        <p>{dashboardData.quantityEmailsIn24h}</p>
                         <div className="range">
-                            <div className="fill" style={{ width: `${progressEmailSentToday}%` }}></div>
+                            <div className="fill" style={{ width: `${((progressEmailSentToday) / 5000) * 100}%` }}></div>
                         </div>
                     </div>
                 </div>
@@ -145,7 +145,7 @@ function Dashboard() {
                     <div className="data">
                         <p>{progressTotalEmailsSended.toFixed(0)}</p>
                         <div className="range">
-                            <div className="fill" style={{ width: `${progressTotalEmailsSended}%` }}></div>
+                            <div className="fill" style={{ width: `${((progressTotalEmailsSended) / 5000) * 100 }%` }}></div>
                         </div>
                     </div>
                 </div>

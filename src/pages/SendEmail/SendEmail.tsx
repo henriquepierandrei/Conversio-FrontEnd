@@ -1,51 +1,71 @@
 import React, { useState, useEffect } from 'react';
-import '../SendEmail/SendEmail.css';
 import axios from 'axios';
 import Header from '../../components/header/Header';
 import Cookies from 'js-cookie';
-import { parseCookies } from "nookies";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheck, faEnvelope, faX } from '@fortawesome/free-solid-svg-icons';
-
+import { faCheck, faEnvelope, faX, faUpload, faPaperPlane, faEye, faUsers, faFileImport } from '@fortawesome/free-solid-svg-icons';
+import "../SendEmail/SendEmail.css"
 function SendEmail() {
+    // State for UI transitions
+    const [isVisible, setIsVisible] = useState(false);
+    
+    // Form state
+    const [templateType, setTemplateType] = useState("ALERT");
+    const [error, setError] = useState<string | null>(null);
+    const [fileName, setFileName] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
+    const [checkboxHabilitado, setCheckboxHabilitado] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [uploadResponse, setUploadResponse] = useState<any[] | null>(null);
+    const [formData, setFormData] = useState({
+        from: '',
+        subject: '',
+        pOne: '',
+        pTwo: '',
+        urlButton: '',
+        urlBanner: '',
+        type: 'ALERT',
+        clients: [] as any[]
+    });
+    
+    // Preview toggle
+    const [showPreview, setShowPreview] = useState(true);
+
     useEffect(() => {
+        // Set up timers for alerts
         const errorTimeout = setTimeout(() => {
-            if (error) {
-                setError('');
-            }
+            if (error) setError(null);
         }, 3000);
 
-        // Timeout para limpar a mensagem de sucesso
         const successTimeout = setTimeout(() => {
-            if (success) {
-                setSuccess('');
-            }
+            if (success) setSuccess(null);
         }, 3000);
 
+        // Animation delay
         setTimeout(() => {
             setIsVisible(true);
-        }, 100); // Pequeno delay para ativar a animação
+        }, 100);
 
         return () => {
             clearTimeout(errorTimeout);
             clearTimeout(successTimeout);
         };
+    }, [error, success]);
 
+    // Handle form input changes
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setFormData((prevState) => ({
+            ...prevState,
+            [name]: value,
+        }));
 
+        if (name === "type") {
+            setTemplateType(value);
+        }
+    };
 
-    }, []);
-
-    const [isVisible, setIsVisible] = useState(false);
-    const [templateType, setTemplateType] = useState("ALERT"); // Valor padrão inicial
-    const [error, setError] = useState<string | null>(null);
-    const [fileName, setFileName] = useState<string | null>(null);
-    const [success, setSuccess] = useState<string | null>(null);
-    const [checkboxHabilitado, setCheckboxHabilitado] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [uploadResponse, setUploadResponse] = useState(null);
-
-
-
+    // Handle CSV file upload
     const handleUploadCsv = async (e: React.FormEvent) => {
         e.preventDefault();
         const token = Cookies.get("accessToken");
@@ -64,6 +84,7 @@ function SendEmail() {
         }
 
         setFileName(file.name);
+        setLoading(true);
 
         const formData = new FormData();
         formData.append("file", file);
@@ -80,53 +101,19 @@ function SendEmail() {
                 }
             );
 
-            // Armazena a resposta no estado
             setUploadResponse(response.data);
-
             fileInput.value = "";
-            setFileName(null);
-        } catch (err) {
+            setSuccess("Arquivo CSV carregado com sucesso!");
+        } catch (err: any) {
             console.error("Erro ao enviar arquivo CSV:", err.response?.data || err.message);
             setError(`Falha ao enviar arquivo CSV: ${err.response?.data?.message || err.message}`);
+        } finally {
+            setLoading(false);
         }
     };
 
-
-    const [formData, setFormData] = useState<{
-        from: string;
-        subject: string;
-        pOne: string;
-        pTwo: string;
-        urlButton: string;
-        urlBanner: string;
-        type: string;
-        clients: any[]; // Permite armazenar qualquer tipo de cliente
-    }>({
-        from: '',
-        subject: '',
-        pOne: '',
-        pTwo: '',
-        urlButton: '',
-        urlBanner: '',
-        type: '',
-        clients: []
-    });
-
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-
-        setFormData((prevState) => ({
-            ...prevState,
-            [name]: value, // Atualiza apenas o campo específico
-        }));
-
-        if (name === "type") {
-            setTemplateType(value); // Atualiza o template somente quando for o campo "type"
-        }
-    };
-
-    const handleSendEmail = async (e) => {
+    // Handle email send
+    const handleSendEmail = async (e: React.FormEvent) => {
         e.preventDefault();
         const token = Cookies.get('accessToken');
 
@@ -134,28 +121,39 @@ function SendEmail() {
             setError("Usuário não autenticado. Faça login novamente.");
             return;
         }
+        
+        if (!formData.from || !formData.subject || !formData.pOne || !formData.pTwo) {
+            setError("Por favor, preencha todos os campos obrigatórios.");
+            return;
+        }
 
-        setLoading(true); // Inicia o carregamento
+        setLoading(true);
 
         try {
             let updatedClients: any[] = [];
 
             if (checkboxHabilitado) {
-                // Buscar os clients já salvos no banco de dados
-                const clientsResponse = await axios.get("http://localhost:8080/api/v1/clients/get/all/no-pageable", {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
+                const clientsResponse = await axios.get(
+                    "http://localhost:8080/api/v1/clients/get/all/no-pageable", 
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        }
                     }
-                });
-
+                );
                 updatedClients = Array.isArray(clientsResponse.data) ? clientsResponse.data : [];
             } else {
-                // Usar os clientes do último upload (evitando null)
                 updatedClients = Array.isArray(uploadResponse) ? uploadResponse : [];
+                
+                if (updatedClients.length === 0) {
+                    setError("Nenhum cliente selecionado. Faça upload de um arquivo CSV ou selecione todos os clientes.");
+                    setLoading(false);
+                    return;
+                }
             }
 
-            // Enviar e-mail com a lista correta de clientes
-            await axios.post("http://localhost:8080/api/v1/send/email",
+            await axios.post(
+                "http://localhost:8080/api/v1/send/email",
                 { ...formData, clients: updatedClients },
                 {
                     headers: {
@@ -165,35 +163,116 @@ function SendEmail() {
                 }
             );
 
-            setSuccess("Email enviado com sucesso!");
+            setSuccess("Emails enviados com sucesso!");
 
-            // Aguarda 2 segundos antes de recarregar a página
             setTimeout(() => {
                 window.location.reload();
             }, 2000);
 
         } catch (err) {
             console.error("Erro ao enviar e-mail:", err);
-            setError("Falha ao enviar e-mail.");
+            setError("Falha ao enviar e-mail. Verifique suas informações e tente novamente.");
         } finally {
-            setLoading(false); // Finaliza o carregamento
+            setLoading(false);
         }
     };
 
+    // Get template badge class based on type
+    const getBadgeClass = (type: string) => {
+        switch(type) {
+            case 'ALERT': return 'badge-alert';
+            case 'PROMOTION': return 'badge-promotion';
+            case 'CHARGE': return 'badge-charge';
+            default: return 'badge-alert';
+        }
+    };
 
+    // Get template name based on type
+    const getTemplateName = (type: string) => {
+        switch(type) {
+            case 'ALERT': return 'Alerta';
+            case 'PROMOTION': return 'Promoção';
+            case 'CHARGE': return 'Cobrança';
+            default: return 'Alerta';
+        }
+    };
 
+    // Get button color based on template type
+    const getButtonColor = (type: string) => {
+        switch(type) {
+            case 'ALERT': return '#ffd30d';
+            case 'PROMOTION': return '#00c6a9';
+            case 'CHARGE': return '#44a0ce';
+            default: return '#ffd30d';
+        }
+    };
+
+    // Get header color based on template type
+    const getHeaderColor = (type: string) => {
+        switch(type) {
+            case 'ALERT': return '#ffd30d';
+            case 'PROMOTION': return '#333333';
+            case 'CHARGE': return '#44a0ce';
+            default: return '#ffd30d';
+        }
+    };
+
+    // Get button text based on template type
+    const getButtonText = (type: string) => {
+        switch(type) {
+            case 'ALERT': return 'Ver Agora!';
+            case 'PROMOTION': return 'Acessar Agora!';
+            case 'CHARGE': return 'Pagar Agora!';
+            default: return 'Ver Agora!';
+        }
+    };
+
+    // Get text color for header based on template type
+    const getHeaderTextColor = (type: string) => {
+        switch(type) {
+            case 'ALERT': return '#1f1b1b';
+            case 'PROMOTION': return '#ffffff';
+            case 'CHARGE': return '#ffffff';
+            default: return '#1f1b1b';
+        }
+    };
+
+    // Get button text color based on template type
+    const getButtonTextColor = (type: string) => {
+        switch(type) {
+            case 'ALERT': return '#202020';
+            case 'PROMOTION': return '#ffffff';
+            case 'CHARGE': return '#ffffff';
+            default: return '#202020';
+        }
+    };
+
+    // Get icon URL based on template type
+    const getIconUrl = (type: string) => {
+        switch(type) {
+            case 'ALERT': return "https://img.icons8.com/?size=100&id=8122&format=png&color=1f1b1b";
+            case 'PROMOTION': return "https://img.icons8.com/?size=100&id=12095&format=png&color=FFFFFF";
+            case 'CHARGE': return "https://img.icons8.com/?size=100&id=123507&format=png&color=FFFFFF";
+            default: return "https://img.icons8.com/?size=100&id=8122&format=png&color=1f1b1b";
+        }
+    };
 
     return (
         <div className='container-send-email-principal'>
-            {error && <div className='alert alert-danger' style={{zIndex: "9999"}}><FontAwesomeIcon icon={faX} /> {error}</div>}
-            {success && <div className='alert alert-success' style={{zIndex: "9999"}}><FontAwesomeIcon icon={faCheck} /> {success}</div>}
+            {/* Notifications */}
+            {error && <div className='alert alert-danger'><FontAwesomeIcon icon={faX} /> {error}</div>}
+            {success && <div className='alert alert-success'><FontAwesomeIcon icon={faCheck} /> {success}</div>}
+            
+            {/* Header */}
             <div style={{ position: "absolute", top: "5px", left: "5px" }}><Header /></div>
 
             <div className='container-send-email'>
+                {/* Form Section */}
                 <div className='form-send-email'>
                     <h1 className='h1-send-email'>Envio de Emails</h1>
+                    
                     <form onSubmit={handleSendEmail}>
-                        <div className="input-group mb-3 send-email-input">
+                        <div className="input-group mb-3">
                             <span className="input-group-text">Conta Smtp</span>
                             <input
                                 type="text"
@@ -201,85 +280,90 @@ function SendEmail() {
                                 value={formData.from}
                                 onChange={handleChange}
                                 className="form-control"
-                                aria-label="Sizing example input"
-                                aria-describedby="inputGroup-sizing-default"
+                                placeholder="exemplo@empresa.com"
+                                aria-label="Conta Smtp"
                             />
                         </div>
 
-                        <div className="input-group mb-3 send-email-input">
-                            <span className="input-group-text" id="inputGroup-sizing-default">Título</span>
+                        <div className="input-group mb-3">
+                            <span className="input-group-text">Título</span>
                             <input
                                 type="text"
                                 name="subject"
                                 value={formData.subject}
                                 onChange={handleChange}
                                 className="form-control"
-                                aria-label="Sizing example input"
-                                aria-describedby="inputGroup-sizing-default"
+                                placeholder="Título do email"
+                                aria-label="Título"
                             />
                         </div>
-                        <div className="input-group mb-3 send-email-input">
-                            <span className="input-group-text" id="inputGroup-sizing-default">Texto Primário</span>
+                        
+                        <div className="input-group mb-3">
+                            <span className="input-group-text">Texto Primário</span>
                             <input
                                 type="text"
                                 name="pOne"
                                 value={formData.pOne}
                                 onChange={handleChange}
                                 className="form-control"
-                                aria-label="Sizing example input"
-                                aria-describedby="inputGroup-sizing-default"
+                                placeholder="Texto principal do email"
+                                aria-label="Texto Primário"
                             />
                         </div>
-                        <div className="input-group mb-3 send-email-input">
-                            <span className="input-group-text" id="inputGroup-sizing-default">Texto Secundário</span>
+                        
+                        <div className="input-group mb-3">
+                            <span className="input-group-text">Texto Secundário</span>
                             <input
                                 type="text"
                                 name="pTwo"
                                 value={formData.pTwo}
                                 onChange={handleChange}
                                 className="form-control"
-                                aria-label="Sizing example input"
-                                aria-describedby="inputGroup-sizing-default"
+                                placeholder="Texto complementar"
+                                aria-label="Texto Secundário"
                             />
                         </div>
-                        <div className="input-group mb-3 send-email-input">
-                            <span className="input-group-text" id="inputGroup-sizing-default">URL Botão</span>
+                        
+                        <div className="input-group mb-3">
+                            <span className="input-group-text">URL Botão</span>
                             <input
                                 type="text"
                                 name="urlButton"
                                 value={formData.urlButton}
                                 onChange={handleChange}
                                 className="form-control"
-                                aria-label="Sizing example input"
-                                aria-describedby="inputGroup-sizing-default"
+                                placeholder="https://exemplo.com/acao"
+                                aria-label="URL Botão"
                             />
                         </div>
-                        <div className="input-group mb-3 send-email-input">
-                            <span className="input-group-text" id="inputGroup-sizing-default">URL Imagem</span>
+                        
+                        <div className="input-group mb-3">
+                            <span className="input-group-text">URL Imagem</span>
                             <input
                                 type="text"
                                 name="urlBanner"
                                 value={formData.urlBanner}
                                 onChange={handleChange}
                                 className="form-control"
-                                aria-label="Sizing example input"
-                                aria-describedby="inputGroup-sizing-default"
+                                placeholder="https://exemplo.com/imagem.jpg"
+                                aria-label="URL Imagem"
                             />
                         </div>
+                        
                         <select
                             name="type"
                             value={formData.type}
                             onChange={handleChange}
                             className="form-select"
-                            aria-label="Default select example"
-                            style={{ cursor: "pointer" }}
+                            aria-label="Selecione o Template"
                         >
                             <option value="" disabled>Selecione o Template</option>
                             <option value="ALERT">Alerta</option>
                             <option value="PROMOTION">Promoção</option>
                             <option value="CHARGE">Cobrança</option>
                         </select>
-                        <div className="form-check form-switch">
+                        
+                        <div className="form-check form-switch mb-3">
                             <input
                                 className="form-check-input"
                                 type="checkbox"
@@ -288,30 +372,51 @@ function SendEmail() {
                                 onChange={(e) => setCheckboxHabilitado(e.target.checked)}
                             />
                             <label className="form-check-label" htmlFor="flexSwitchCheckChecked">
-                                Enviar para todos os Clientes.
+                                Enviar para todos os Clientes <FontAwesomeIcon icon={faUsers} size="sm" />
                             </label>
+                        </div>
 
+                        {/* Preview Toggle */}
+                        <div className="form-check form-switch mb-3">
+                            <input
+                                className="form-check-input"
+                                type="checkbox"
+                                role="switch"
+                                id="togglePreview"
+                                checked={showPreview}
+                                onChange={(e) => setShowPreview(e.target.checked)}
+                            />
+                            <label className="form-check-label" htmlFor="togglePreview">
+                                Mostrar Preview <FontAwesomeIcon icon={faEye} size="sm" />
+                            </label>
+                        </div>
 
-                        </div><br />
-
-                        <button type="submit" className='btn btn-primary' style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center", gap: "10px" }}><FontAwesomeIcon icon={faEnvelope} /> Enviar Emails {loading && <div className="spinner-grow" role="status" style={{ position: "relative", height: "20px", width: "20px" }}>
-                            <span className="visually-hidden">Loading...</span>
-                        </div>}</button>
-                    </form><br />
-                    <form onSubmit={handleUploadCsv} style={{ width: "400px", margin: "auto" }}>
+                        <button 
+                            type="submit" 
+                            className='btn btn-primary' 
+                            style={{ width: "100%" }}
+                            disabled={loading}
+                        >
+                            <FontAwesomeIcon icon={faPaperPlane} /> 
+                            {loading ? ' Enviando...' : ' Enviar Emails'}
+                            {loading && 
+                                <div className="spinner-grow ms-2" role="status">
+                                    <span className="visually-hidden">Loading...</span>
+                                </div>
+                            }
+                        </button>
+                    </form>
+                    
+                    <hr />
+                    
+                    {/* CSV Upload Section */}
+                    <form onSubmit={handleUploadCsv} style={{ width: "100%", margin: "auto" }}>
+                        <h5 className="text-center mb-3">Upload de Clientes <FontAwesomeIcon icon={faFileImport} /></h5>
+                        
                         <label className="custum-file-upload" htmlFor="csvFileInput">
-                            <div className="icon"></div>
                             <div className="text">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    height="80"
-                                    fill="currentColor"
-                                >
-                                    {/* Ícone SVG */}
-                                </svg>
-                                <img src="https://cdn3.iconfinder.com/data/icons/ikooni-outline-file-formats/128/files2-19-512.png" alt="" width={"20%"} />
-                                <span>Clique aqui para enviar o Arquivo.CSV</span>
+                                <img src="https://cdn3.iconfinder.com/data/icons/ikooni-outline-file-formats/128/files2-19-512.png" alt="" width="15%" />
+                                <span>Clique para selecionar um arquivo CSV</span>
                             </div>
                             <input
                                 type="file"
@@ -322,228 +427,134 @@ function SendEmail() {
                                 onChange={(e) => {
                                     const file = e.target.files?.[0];
                                     if (file) {
-                                        setFileName(file.name); // Atualiza o nome do arquivo selecionado
+                                        setFileName(file.name);
                                     }
                                 }}
                             />
                         </label>
-                        <br />
-                        {/* Exibe o nome do arquivo selecionado */}
-                        {fileName && <p>Arquivo selecionado: <strong>{fileName}</strong></p>}
-                        <button type="submit" className='btn btn-add-client'>
-                            Fazer o Upload do arquivo CSV
+                        
+                        {fileName && 
+                            <div className="alert alert-info mt-2">
+                                Arquivo selecionado: <strong>{fileName}</strong>
+                            </div>
+                        }
+                        
+                        <button 
+                            type="submit" 
+                            className='btn btn-add-client'
+                            style={{ width: "100%" }}
+                            disabled={loading}
+                        >
+                            <FontAwesomeIcon icon={faUpload} /> 
+                            {loading ? ' Carregando...' : ' Fazer Upload do arquivo CSV'}
+                            {loading && 
+                                <div className="spinner-grow ms-2" role="status">
+                                    <span className="visually-hidden">Loading...</span>
+                                </div>
+                            }
                         </button>
                     </form>
                 </div>
 
-                <div className={`template-send-email ${isVisible ? 'fade-in' : ''}`}>
-                    {templateType === "PROMOTION" && (
-                        <table width="100%" cellSpacing={0} cellPadding={0} style={{ borderCollapse: 'collapse', display: "block" }}>
-                            <tbody>
-                                <tr>
-                                    <td align="center">
-                                        <table width="355" cellSpacing={0} cellPadding={0} style={{ backgroundColor: '#ffffff', border: '1px solid #E6E6E6' }}>
-                                            {/* Header */}
-                                            <tr style={{ backgroundColor: '#333333' }}>
-                                                <td align="center" style={{ padding: '5px', color: '#ffffff', fontFamily: 'Arial, sans-serif' }}>
-                                                    <img src="https://img.icons8.com/?size=100&id=12095&format=png&color=FFFFFF" width={30} height={30} alt="Gift" />
-                                                    <h2 style={{ margin: '10px 0', wordBreak: "break-word", fontSize: "1em" }}>
-                                                        {/* {formData.subject || "Título Default"} */}
-                                                        Título Default
-                                                    </h2>
-                                                </td>
-                                            </tr>
-                                            {/* Content */}
-                                            <tr>
-                                                <td style={{ padding: '10px', fontFamily: 'Arial, sans-serif', color: '#333' }}>
-                                                    <p style={{ fontSize: '1em' }}>Olá <strong>Usuário</strong>, confira as promoções!</p>
-                                                    <hr style={{ backgroundColor: 'gray', height: '5px' }} />
-                                                    <br />
-                                                    <p style={{ color: 'rgb(83, 81, 81)', padding: '5px', wordBreak: "break-word" }}>
-                                                        {formData.pOne || "Promoção incrível disponível agora!"}
-                                                    </p>
-                                                    <hr style={{ width: '150px', backgroundColor: 'rgb(218, 218, 218)', border: 'none', height: '2px' }} />
-                                                    <p style={{ color: 'rgb(83, 81, 81)', padding: '5px', wordBreak: "break-word" }}>
-                                                        {formData.pTwo || "Aproveite antes que acabe!"}
-                                                    </p>
+                {/* Template Preview Section */}
+                {showPreview && (
+                    <div className={`template-send-email ${isVisible ? 'fade-in' : ''}`}>
+                        <div className="preview-header">
+                            <h4>Preview do Email</h4>
+                            <span className={`template-type-badge ${getBadgeClass(templateType)}`}>
+                                {getTemplateName(templateType)}
+                            </span>
+                        </div>
+                        
+                        <div className="email-template-preview">
+                            <table width="100%" cellSpacing={0} cellPadding={0} style={{ borderCollapse: 'collapse' }}>
+                                <tbody>
+                                    <tr>
+                                        <td align="center">
+                                            <table width="100%" cellSpacing={0} cellPadding={0} style={{ backgroundColor: '#ffffff', border: '1px solid #e0e5ec', borderRadius: '8px', overflow: 'hidden' }}>
+                                                {/* Header */}
+                                                <tr style={{ backgroundColor: getHeaderColor(templateType) }}>
+                                                    <td align="center" style={{ padding: '15px', color: getHeaderTextColor(templateType), fontFamily: 'Arial, sans-serif' }}>
+                                                        <img src={getIconUrl(templateType)} width={32} height={32} alt="Icon" />
+                                                        <h2 style={{ margin: '10px 0', wordBreak: "break-word", fontSize: "1.2em", color: getHeaderTextColor(templateType) }}>
+                                                            {formData.subject || "Título do Email"}
+                                                        </h2>
+                                                    </td>
+                                                </tr>
+                                                
+                                                {/* Content */}
+                                                <tr>
+                                                    <td style={{ padding: '20px', fontFamily: 'Arial, sans-serif', color: '#333' }}>
+                                                        <p style={{ fontSize: '1em' }}>
+                                                            Olá <strong>Usuário</strong>,
+                                                            {templateType === 'ALERT' && ' leia esse email com atenção!'}
+                                                            {templateType === 'PROMOTION' && ' confira as promoções!'}
+                                                            {templateType === 'CHARGE' && ' temos um aviso importante!'}
+                                                        </p>
+                                                        
+                                                        <hr style={{ backgroundColor: '#e0e5ec', height: '1px', border: 'none' }} />
+                                                        
+                                                        <p style={{ color: '#505050', padding: '5px', wordBreak: "break-word" }}>
+                                                            {formData.pOne || "Texto principal do email"}
+                                                        </p>
+                                                        
+                                                        <hr style={{ width: '80px', backgroundColor: '#e0e5ec', border: 'none', height: '1px', margin: '15px auto' }} />
+                                                        
+                                                        <p style={{ color: '#505050', padding: '5px', wordBreak: "break-word" }}>
+                                                            {formData.pTwo || "Texto complementar do email"}
+                                                        </p>
 
-                                                    <img
-                                                        src={formData.urlBanner || "https://i0.wp.com/espaferro.com.br/wp-content/uploads/2024/06/placeholder-103.png?ssl=1"}
-                                                        alt="Banner Promocional"
-                                                        style={{ width: '45%', borderRadius: '10px', margin: '10px auto' }}
-                                                    />
-                                                    <br />
-                                                    <hr />
-                                                    <p>Se você tiver dúvidas sobre nossos serviços, visite nossa <a href="#" style={{ color: '#00aaff', textDecoration: 'none' }}>Central de Ajuda</a>.</p>
-                                                    <p>Obrigado,<br /><strong>Nome da Empresa</strong></p>
-                                                </td>
-                                            </tr>
-                                            {/* Button */}
-                                            <tr>
-                                                <td align="center" style={{ padding: '10px' }}>
-                                                    <a
-
-                                                        style={{
-                                                            backgroundColor: '#00c6a9',
-                                                            color: '#ffffff',
-                                                            padding: '10px 20px',
-                                                            textDecoration: 'none',
-                                                            fontSize: '14px',
-                                                            fontFamily: 'Arial, sans-serif',
-                                                            borderRadius: '5px'
-                                                        }}
-                                                    >
-                                                        Acessar Agora!
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    )}
-
-                    {templateType === "CHARGE" && (
-                        <table width="100%" cellSpacing={0} cellPadding={0} style={{ borderCollapse: 'collapse', display: "block" }}>
-                            <tbody>
-                                <tr>
-                                    <td align="center">
-                                        <table width="355" cellSpacing={0} cellPadding={0} style={{ backgroundColor: '#ffffff', border: '1px solid #E6E6E6' }}>
-                                            {/* Header */}
-                                            <tr style={{ backgroundColor: '#44a0ce' }}>
-                                                <td align="center" style={{ padding: '5px', color: '#ffffff', fontFamily: 'Arial, sans-serif' }}>
-                                                    <img src="https://img.icons8.com/?size=100&id=123507&format=png&color=FFFFFF" width={30} height={30} alt="Gift" />
-                                                    <h2 style={{ margin: '10px 0', wordBreak: "break-word", fontSize: "1em" }}>
-                                                        Título Default
-
-                                                    </h2>
-                                                </td>
-                                            </tr>
-                                            {/* Content */}
-                                            <tr>
-                                                <td style={{ padding: '10px', fontFamily: 'Arial, sans-serif', color: '#333' }}>
-                                                    <p style={{ fontSize: '1em' }}>Prezado <strong>Usuário</strong>,</p>
-                                                    <hr style={{ backgroundColor: 'gray', height: '5px' }} />
-                                                    <br />
-                                                    <p style={{ color: 'rgb(83, 81, 81)', padding: '5px', wordBreak: "break-word" }}>
-                                                        {formData.pOne || "Exemplo de texto"}
-                                                    </p>
-                                                    <hr style={{ width: '150px', backgroundColor: 'rgb(218, 218, 218)', border: 'none', height: '2px' }} />
-                                                    <p style={{ color: 'rgb(83, 81, 81)', padding: '5px', wordBreak: "break-word" }}>
-                                                        {formData.pTwo || "Exemplo de texto"}
-                                                    </p>
-
-                                                    <img
-                                                        src={formData.urlBanner || "https://i0.wp.com/espaferro.com.br/wp-content/uploads/2024/06/placeholder-103.png?ssl=1"}
-                                                        alt="Banner Promocional"
-                                                        style={{ width: '50%', borderRadius: '10px', margin: '10px auto' }}
-                                                    />
-                                                    <br />
-                                                    <hr />
-                                                    <p>Se você tiver dúvidas sobre nossos serviços, visite nossa <a href="#" style={{ color: '#00aaff', textDecoration: 'none' }}>Central de Ajuda</a>.</p>
-                                                    <p>Obrigado,<br /><strong>Nome da Empresa</strong></p>
-                                                </td>
-                                            </tr>
-                                            {/* Button */}
-                                            <tr>
-
-
-                                                <td align="center" style={{ padding: '10px' }}>
-                                                    <a
-                                                        style={{
-                                                            backgroundColor: '#44a0ce',
-                                                            color: '#ffffff',
-                                                            padding: '10px 20px',
-                                                            textDecoration: 'none',
-                                                            fontSize: '14px',
-                                                            fontFamily: 'Arial, sans-serif',
-                                                            borderRadius: '5px'
-                                                        }}
-                                                    >
-                                                        Pagar Agora!
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    )}
-
-                    {templateType === "ALERT" && (
-                        <table width="100%" cellSpacing={0} cellPadding={0} style={{ borderCollapse: 'collapse', display: "block" }}>
-                            <tbody>
-                                <tr>
-                                    <td align="center">
-                                        <table width="355" cellSpacing={0} cellPadding={0} style={{ backgroundColor: '#ffffff', border: '1px solid #d4d4d4' }}>
-                                            {/* Header */}
-                                            <tr style={{ backgroundColor: '#ffd30d' }}>
-                                                <td align="center" style={{ padding: '5px', color: '#1f1b1b', fontFamily: 'Arial, sans-serif' }}>
-                                                    <img src="https://img.icons8.com/?size=100&id=8122&format=png&color=1f1b1b" width={30} height={30} alt="Gift" />
-                                                    <h2 style={{ margin: '10px 0', wordBreak: "break-word", fontSize: "1em", color: "#1f1b1b" }}>
-                                                        {/* {formData.subject || "Título do Email"} */}
-                                                        Título Default
-
-                                                    </h2>
-                                                </td>
-                                            </tr>
-                                            {/* Content */}
-                                            <tr>
-                                                <td style={{ padding: '10px', fontFamily: 'Arial, sans-serif', color: '#333' }}>
-                                                    <p style={{ fontSize: '1em' }}>Prezado <strong>Usuário</strong>, leia esse email com atenção!</p>
-                                                    <hr style={{ backgroundColor: 'gray', height: '5px' }} />
-                                                    <br />
-                                                    <p style={{ color: 'rgb(83, 81, 81)', padding: '5px', wordBreak: "break-word" }}>
-                                                        {formData.pOne || "Promoção incrível disponível agora!"}
-                                                    </p>
-                                                    <hr style={{ width: '150px', backgroundColor: 'rgb(218, 218, 218)', border: 'none', height: '2px' }} />
-                                                    <p style={{ color: 'rgb(83, 81, 81)', padding: '5px', wordBreak: "break-word" }}>
-                                                        {formData.pTwo || "Aproveite antes que acabe!"}
-                                                    </p>
-
-                                                    <img
-                                                        src={formData.urlBanner || "https://i0.wp.com/espaferro.com.br/wp-content/uploads/2024/06/placeholder-103.png?ssl=1"}
-                                                        alt="Banner Promocional"
-                                                        style={{ width: '50%', borderRadius: '10px', margin: '10px auto' }}
-                                                    />
-                                                    <br />
-                                                    <hr />
-                                                    <p>Se você tiver dúvidas sobre nossos serviços, visite nossa <a href="#" style={{ color: '#00aaff', textDecoration: 'none' }}>Central de Ajuda</a>.</p>
-                                                    <p>Obrigado,<br /><strong>Nome da Empresa</strong></p>
-                                                </td>
-                                            </tr>
-                                            {/* Button */}
-                                            <tr>
-
-
-                                                <td align="center" style={{ padding: '10px' }}>
-                                                    <a
-                                                        style={{
-                                                            backgroundColor: ' #ffd30d',
-                                                            color: '#202020',
-                                                            padding: '10px 20px',
-                                                            textDecoration: 'none',
-                                                            fontSize: '14px',
-                                                            fontFamily: 'Arial, sans-serif',
-                                                            borderRadius: '5px'
-                                                        }}
-                                                    >
-                                                        Ver Agora!
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    )}
-                </div>
+                                                        <img
+                                                            src={formData.urlBanner || "https://i0.wp.com/espaferro.com.br/wp-content/uploads/2024/06/placeholder-103.png?ssl=1"}
+                                                            alt="Banner"
+                                                            style={{ width: '80%', borderRadius: '8px', margin: '15px auto', display: 'block' }}
+                                                        />
+                                                        
+                                                        <hr style={{ backgroundColor: '#e0e5ec', height: '1px', border: 'none', margin: '15px 0' }} />
+                                                        
+                                                        <p style={{ fontSize: '0.9em', color: '#666' }}>
+                                                            Se você tiver dúvidas, visite nossa <a href="#" style={{ color: '#4361ee', textDecoration: 'none' }}>Central de Ajuda</a>.
+                                                        </p>
+                                                        
+                                                        <p style={{ fontSize: '0.9em', color: '#666' }}>
+                                                            Atenciosamente,<br />
+                                                            <strong>Nome da Empresa</strong>
+                                                        </p>
+                                                    </td>
+                                                </tr>
+                                                
+                                                {/* Button */}
+                                                <tr>
+                                                    <td align="center" style={{ padding: '10px 10px 20px' }}>
+                                                        <a
+                                                            href={formData.urlButton || "#"}
+                                                            style={{
+                                                                backgroundColor: getButtonColor(templateType),
+                                                                color: getButtonTextColor(templateType),
+                                                                padding: '12px 24px',
+                                                                textDecoration: 'none',
+                                                                fontSize: '14px',
+                                                                fontFamily: 'Arial, sans-serif',
+                                                                borderRadius: '6px',
+                                                                fontWeight: '500',
+                                                                display: 'inline-block'
+                                                            }}
+                                                        >
+                                                            {getButtonText(templateType)}
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
             </div>
-        </div >
-    )
+        </div>
+    );
 }
 
 export default SendEmail;

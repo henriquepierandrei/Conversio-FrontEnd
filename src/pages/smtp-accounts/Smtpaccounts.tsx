@@ -312,7 +312,7 @@ const Smtpaccounts = () => {
             className='btn-create-smtp' 
             disabled={isLoading}
           >
-            {isLoading ? 'Adding...' : 'Add SMTP Account'}
+            {isLoading ? 'Carregando...' : 'Salvar Conta SMTP'}
           </button>
         </form>
       </div>

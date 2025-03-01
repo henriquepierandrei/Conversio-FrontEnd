@@ -62,7 +62,7 @@
   
   /* Upload de Arquivo */
   .custum-file-upload {
-    height: auto;
+    height: max-content;
     min-height: 180px;
     width: 100%;
     max-width: 500px;
@@ -78,6 +78,8 @@
     border-radius: 12px;
     transition: all 0.3s ease;
     margin-bottom: 20px;
+  }.custum-file-upload span{
+    margin-bottom: 10%;
   }
   
   .custum-file-upload:hover {

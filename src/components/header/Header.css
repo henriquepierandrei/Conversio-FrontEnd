@@ -1,9 +1,6 @@
 @import "tailwindcss";
 
-/* Reset e estilos gerais */
-* {
-  box-sizing: border-box;
-}
+
 
 a {
   text-decoration: none;
@@ -196,6 +193,11 @@ a {
 .dropdown-menu {
   display: none;
   padding: 0.5rem 0;
+  width: 90%;
+}
+
+.dropdown-menu a:hover{
+  width: 95%;
 }
 
 .dropdown-menu.show {

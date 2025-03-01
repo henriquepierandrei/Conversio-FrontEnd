@@ -447,17 +447,7 @@ const Smtpaccounts = () => {
                   required
                 />
               </div>
-              <div className="mb-3">
-                <label htmlFor="update-password" className="form-label">Password:</label>
-                <input
-                  type="password"
-                  id="update-password"
-                  className="form-control"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Leave empty to keep current password"
-                />
-              </div>
+              
               <div className="mb-3">
                 <label htmlFor="update-sslTrust" className="form-label">SSL Trust:</label>
                 <input
